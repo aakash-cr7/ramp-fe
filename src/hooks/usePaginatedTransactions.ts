@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react"
+import { useCallback, useContext, useState } from "react"
+import { AppContext } from "src/utils/context"
 import { PaginatedRequestParams, PaginatedResponse, Transaction } from "../utils/types"
 import { PaginatedTransactionsResult } from "./types"
 import { useCustomFetch } from "./useCustomFetch"
 
 export function usePaginatedTransactions(): PaginatedTransactionsResult {
   const { fetchWithCache, loading } = useCustomFetch()
+  const { cache } = useContext(AppContext)
   const [paginatedTransactions, setPaginatedTransactions] = useState<PaginatedResponse<
     Transaction[]
   > | null>(null)
@@ -30,5 +32,28 @@ export function usePaginatedTransactions(): PaginatedTransactionsResult {
     setPaginatedTransactions(null)
   }, [])
 
-  return { data: paginatedTransactions, loading, fetchAll, invalidateData }
+  // update the approved value of a transaction in paginatedResults cache
+  const updateCache = useCallback((newValue: boolean, transactionId: string) => {
+    if (!cache?.current) return
+
+    cache.current.forEach((value: string, key: string) => {
+      if (key.includes("paginatedTransactions")) {
+        const data = JSON.parse(value)
+        const result = data.data.map((t: Transaction) => {
+          if (t.id === transactionId) {
+            return {
+              ...t,
+              approved: newValue,
+            }
+          }
+          return t
+        })
+
+        data.data = result
+        cache?.current.set(key, JSON.stringify(data))
+      }
+    })
+  }, [])
+
+  return { data: paginatedTransactions, loading, fetchAll, invalidateData, updateCache }
 }

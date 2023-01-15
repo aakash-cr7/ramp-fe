@@ -43,8 +43,6 @@ export function App() {
     }
   }, [employeeUtils.loading, employees, loadAllTransactions])
 
-  console.log("paginatedTransactions", paginatedTransactions)
-
   return (
     <Fragment>
       <main className="MainContainer">

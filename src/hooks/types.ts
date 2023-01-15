@@ -8,10 +8,12 @@ type UseTypeBaseResult<TValue> = {
 
 type UseTypeBaseAllResult<TValue> = UseTypeBaseResult<TValue> & {
   fetchAll: () => Promise<void>
+  updateCache: (value: boolean, transactionId: string) => void
 }
 
 type UseTypeBaseByIdResult<TValue> = UseTypeBaseResult<TValue> & {
   fetchById: (id: string) => Promise<void>
+  updateCache: (employeeId: string, value: boolean, transactionId: string) => void
 }
 
 export type EmployeeResult = UseTypeBaseAllResult<Employee[] | null>
